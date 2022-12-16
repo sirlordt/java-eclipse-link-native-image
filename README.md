@@ -110,16 +110,19 @@ Vs Code Enviroment 04
 ![vs_code_04](others/images/vs_code_04.png)
 
 Vs Code Enviroment 05
-![vs_code_04](others/images/vs_code_05.png)
+![vs_code_05](others/images/vs_code_05.png)
 
 Vs Code Enviroment 06
-![vs_code_04](others/images/vs_code_06.png)
+![vs_code_06](others/images/vs_code_06.png)
 
 Vs Code Enviroment 07
-![vs_code_04](others/images/vs_code_07.png)
+![vs_code_07](others/images/vs_code_07.png)
 
 Vs Code Enviroment 08
-![vs_code_04](others/images/vs_code_08.png)
+![vs_code_08](others/images/vs_code_08.png)
 
 Vs Code Enviroment 09
-![vs_code_04](others/images/vs_code_09.png)
+![vs_code_09](others/images/vs_code_09.png)
+
+Vs Code Enviroment 10
+![vs_code_10](others/images/vs_code_10.png)
