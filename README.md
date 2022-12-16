@@ -7,6 +7,12 @@
 
 https://www.graalvm.org/22.2/reference-manual/native-image/guides/use-native-image-maven-plugin/
 
+If you are in ubuntu/linux install before. To avoid super stranger errors of graalvm/native-image
+
+```
+apt-get install build-essential zlib1g-dev
+```
+
 Please before install sdkman
 
 sdkman install (sometimes later of install your need close and open your terminal or full vscode restart to sdk command can reconigzed)
