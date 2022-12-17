@@ -10,6 +10,9 @@
         <class>com.jpa.example.models.MyObject</class>
         <class>com.jpa.example.models.Book</class>
         <class>com.jpa.example.models.Author</class>
+        <class>com.jpa.example.models.EntityA</class>
+        <class>com.jpa.example.models.EntityB</class>
+        <class>com.jpa.example.converter.JpaConverterJson</class>
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/Test01DB"/>
@@ -21,6 +24,10 @@
             <property name="jakarta.persistence.schema-generation.drop-script-source" value="drop-db.sql" />
             <property name="jakarta.persistence.sql-load-script-source" value="data.sql" />             -->
             <property name="eclipselink.target-database" value="MySQL"/>
+            <property name="eclipselink.connection-pool.default.initial" value="5" />
+            <property name="eclipselink.connection-pool.default.min" value="5" />
+            <property name="eclipselink.connection-pool.default.max" value="15" />
+            <property name="eclipselink.logging.level" value="SEVERE"/>
         </properties>
     </persistence-unit>
 </persistence>

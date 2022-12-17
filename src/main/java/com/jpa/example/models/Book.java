@@ -20,16 +20,24 @@ public class Book {
     @Column(name="PubDate", columnDefinition = "DATE")
     public LocalDate PubDate;
 
-    @ManyToOne(targetEntity = Author.class)
-    @JoinColumn(name = "AuthorId")
+    @ManyToOne //(targetEntity = Author.class)
+    //@JoinColumn(name = "AuthorId")
     public Author Author;
+
+    // public Author getAuthor() {
+    //     return Author;
+    // }
+
+    // public void setAuthor(Author author) {
+    //     Author = author;
+    // }
 
     public Book() {}
 
     @Override
     public String toString () {
 
-        return "Author{ Id='" + Id + "', Title='" + Title + "', PubDate='" + PubDate  + "', Author=" + Author.toString() + " }";
+        return "Book{ Id='" + Id + "', Title='" + Title + "', PubDate='" + PubDate  + "' }";
 
     }
 

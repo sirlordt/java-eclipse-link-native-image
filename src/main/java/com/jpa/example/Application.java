@@ -1,5 +1,7 @@
 package com.jpa.example;
 
+// import jakarta.json.Json;
+// import jakarta.json.JsonValue;
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -10,11 +12,17 @@ import jakarta.persistence.criteria.CriteriaQuery;
 // import java.nio.charset.StandardCharsets;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 //import java.util.List;
+import java.util.HashMap;
+import java.util.List;
 
+//import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.jpa.example.models.Author;
 import com.jpa.example.models.Book;
+import com.jpa.example.models.EntityA;
+import com.jpa.example.models.EntityB;
 import com.jpa.example.models.MyObject;
 
 public class Application {
@@ -51,26 +59,73 @@ public class Application {
 
         }
 
+        {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence");
+            try {
+                persistEntity(emf);
+                nativeQueries(emf);
+                loadEntityA(emf);
+                loadEntityB(emf);
+            } 
+
+            finally {
+                emf.close();
+            }
+            System.out.println("Press Enter to continue");
+
+            try {
+            
+                System.in.read();
+    
+            }
+            catch( Exception ex ){
+    
+                //
+    
+            }
+    
+        }
+
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence");
         EntityManager entityManager = emf.createEntityManager();
         entityManager.getTransaction().begin();
 
-        Author author = new Author();
-        author.Name = "Tomas Moreno";
-        author.BirthYear = 1979;
-        entityManager.persist(author);
+        Author author01 = new Author();
+        author01.Name = "Tomas Moreno";
+        author01.BirthYear = 1979;
+        author01.bookList = new ArrayList<>();
+        author01.ExtraData = new HashMap<>();
+        author01.ExtraData.put( "Field1" , "Value1" );
+        author01.ExtraData.put( "Field2" , "Value2" );
+        //entityManager.persist(author01);
+
+        Book book01 = new Book();
+        book01.Title = "GraalVM/Native-Image the future of Java";
+        book01.PubDate = LocalDate.now();
+        book01.Author = author01;
+        //book01.setAuthor( author01 );
+        entityManager.persist(book01);
+
+        Book book02 = new Book();
+        book02.Title = "Java 2017";
+        book02.PubDate = LocalDate.now();
+        book02.Author = author01;
+        //book02.setAuthor( author01 );
+        entityManager.persist(book02);
+        
+        author01.bookList = Arrays.asList( book01, book02 );
+        //author01.setBookList( Arrays.asList( book01, book02 ) );
+        entityManager.persist(author01);
+
+        findAuthorById( entityManager, author01.Id );
+        findBookById( entityManager, book01.Id );
+
+        Author author02 = new Author();
+        author02.Name = "Loly Gomez";
+        author02.BirthYear = 1980;
+        entityManager.persist(author02);
 
         //var id = author.Id;
-
-        findAuthorById( entityManager, author.Id );
-
-        Book book = new Book();
-        book.Title = "GraalVM/Native-Image the future of Java";
-        book.PubDate = LocalDate.now();
-        book.Author = author;
-        entityManager.persist(book);
-
-        findBookById( entityManager, book.Id );
 
         MyObject myObject = new MyObject();
         myObject.Data = "one";
@@ -139,12 +194,14 @@ public class Application {
         System.out.println("----\nfinding author by id");
         var o = entityManager.find(Author.class, id ); //2L);
         System.out.println(o);
+        System.out.println( "book list =>" + o.bookList.toString() );
     }
 
     private static void findBookById(EntityManager entityManager, String id ) {
         System.out.println("----\nfinding book by id");
         var o = entityManager.find(Book.class, id ); //2L);
         System.out.println(o);
+        System.out.println( "author =>" + o.Author.toString() );
     }
 
     private static void findObjectById(EntityManager entityManager, String id ) {
@@ -193,4 +250,74 @@ public class Application {
         System.out.println(typedQuery.getResultList());
 
     }
+
+    public static void nativeQuery(EntityManager em, String s) {
+        System.out.printf("-----------------------------%n'%s'%n",  s);
+        Query query = em.createNativeQuery(s);
+        List<?> list = query.getResultList();
+        for (Object o : list) {
+            if(o instanceof Object[]) {
+                System.out.println(Arrays.toString((Object[]) o));
+            }else{
+                System.out.println(o);
+            }
+        }
+    }
+
+    private static void nativeQueries(EntityManagerFactory emf) {
+        System.out.println("-- nativeQueries --");
+        EntityManager em = emf.createEntityManager();
+        Application.nativeQuery(em, "Select * from EntityA");
+        Application.nativeQuery(em, "Select * from EntityB");
+    }
+
+    private static void persistEntity(EntityManagerFactory emf) {
+        System.out.println("-- persistEntity --");
+        EntityManager em = emf.createEntityManager();
+
+        EntityB entityB1 = new EntityB();
+        entityB1.setStrB("testStringB");
+
+        EntityB entityB2 = new EntityB();
+        entityB2.setStrB("testStringB2");
+
+        EntityA entityA = new EntityA();
+        entityA.setStrA("testStringA");
+        entityA.setEntityBList(Arrays.asList(entityB1, entityB2));
+
+        entityB1.setRefEntityA(entityA);
+        entityB2.setRefEntityA(entityA);
+
+        System.out.println("-- persisting entities --");
+        System.out.printf(" %s%n entityA#entityBList: %s%n", entityA, entityA.getEntityBList());
+        System.out.printf(" %s%n entityB1#refEntityA: %s%n", entityB1, entityB1.getRefEntityA());
+        System.out.printf(" %s%n entityB2#refEntityA: %s%n", entityB2, entityB2.getRefEntityA());
+
+        em.getTransaction().begin();
+        em.persist(entityA);
+        em.persist(entityB1);
+        em.persist(entityB2);
+        em.getTransaction().commit();
+
+        em.close();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void loadEntityA(EntityManagerFactory emf) {
+        System.out.println("-- loadEntityA --");
+        EntityManager em = emf.createEntityManager();
+        List<EntityA> entityAList = em.createQuery("Select t from EntityA t").getResultList();
+        entityAList.forEach(e -> System.out.printf(" %s%n entityA#entityBList: %s%n", e, e.getEntityBList()));
+        em.close();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void loadEntityB(EntityManagerFactory emf) {
+        System.out.println("-- loadEntityB --");
+        EntityManager em = emf.createEntityManager();
+        List<EntityB> entityBList = em.createQuery("Select t from EntityB t").getResultList();
+        entityBList.forEach(e -> System.out.printf(" %s%n entityB#refEntityA: %s%n", e, e.getRefEntityA()));
+        em.close();
+    }    
+    
 }
